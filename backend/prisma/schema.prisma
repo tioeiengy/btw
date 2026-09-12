@@ -20,6 +20,12 @@ enum BookingStatus {
   COMPLETED
 }
 
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
 model User {
   id           String     @id @default(uuid())
   fullName     String
@@ -146,7 +152,7 @@ model Payment {
 
   amount Float
 
-  status String @default("PENDING")
+  status PaymentStatus @default(PENDING)
 
   method String?
 

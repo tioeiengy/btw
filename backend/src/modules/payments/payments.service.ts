@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-
 import { PrismaService } from "../../prisma/prisma.service";
 
 
@@ -8,34 +7,18 @@ export class PaymentsService {
 
 
   constructor(
-    private prisma: PrismaService,
+    private readonly prisma: PrismaService,
   ) {}
 
 
 
-  create(data: any) {
+  async create(data:any){
 
     return this.prisma.payment.create({
-      data,
-    });
-
-  }
-
-
-
-  findAll() {
-
-    return this.prisma.payment.findMany();
-
-  }
-
-
-
-  findOne(id: string) {
-
-    return this.prisma.payment.findUnique({
-      where: {
-        id,
+      data:{
+        bookingId: data.bookingId,
+        amount: data.amount,
+        method: data.method,
       },
     });
 
@@ -43,10 +26,80 @@ export class PaymentsService {
 
 
 
-  remove(id: string) {
+  async findAll(){
+
+    return this.prisma.payment.findMany({
+      include:{
+        booking:true,
+      },
+    });
+
+  }
+
+
+
+  async findOne(id:string){
+
+    return this.prisma.payment.findUnique({
+      where:{
+        id,
+      },
+      include:{
+        booking:true,
+      },
+    });
+
+  }
+
+
+
+  async confirm(id:string){
+
+    const payment = await this.prisma.payment.findUnique({
+      where:{
+        id,
+      },
+    });
+
+
+    if(!payment){
+      throw new Error("Payment not found");
+    }
+
+
+
+    const updatedPayment = await this.prisma.payment.update({
+      where:{
+        id,
+      },
+      data:{
+        status:"PAID",
+      },
+    });
+
+
+
+    await this.prisma.booking.update({
+      where:{
+        id: payment.bookingId,
+      },
+      data:{
+        status:"CONFIRMED",
+      },
+    });
+
+
+
+    return updatedPayment;
+
+  }
+
+
+
+  async remove(id:string){
 
     return this.prisma.payment.delete({
-      where: {
+      where:{
         id,
       },
     });

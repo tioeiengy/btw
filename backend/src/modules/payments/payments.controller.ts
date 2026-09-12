@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Patch,
 } from "@nestjs/common";
 
 
@@ -47,6 +48,17 @@ export class PaymentsController {
   ){
 
     return this.paymentsService.findOne(id);
+
+  }
+
+
+
+  @Patch(":id/confirm")
+  confirm(
+    @Param("id") id:string,
+  ){
+
+    return this.paymentsService.confirm(id);
 
   }
 
