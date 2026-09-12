@@ -40,10 +40,16 @@ model User {
   updatedAt DateTime @updatedAt
 
   refreshTokens RefreshToken[]
-  activityLogs  ActivityLog[]
-  trips         Trip[]
-  bookings      Booking[]
-  reviews       Review[]
+
+  activityLogs ActivityLog[]
+
+  trips Trip[]
+
+  bookings Booking[]
+
+  reviews Review[]
+
+  favorites Favorite[]
 
   @@map("users")
 }
@@ -54,7 +60,8 @@ model RefreshToken {
   tokenHash String    @unique
   expiresAt DateTime
   revokedAt DateTime?
-  createdAt DateTime  @default(now())
+
+  createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -63,11 +70,12 @@ model RefreshToken {
 }
 
 model ActivityLog {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   userId    String
   action    String
   ipAddress String?
   userAgent String?
+
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -88,10 +96,14 @@ model Destination {
   rating      Float?
 
   createdAt DateTime @default(now())
+
   updatedAt DateTime @updatedAt
 
   bookings Booking[]
-  reviews  Review[]
+
+  reviews Review[]
+
+  favorites Favorite[]
 
   @@map("destinations")
 }
@@ -190,4 +202,23 @@ model Review {
   @@index([userId])
   @@index([destinationId])
   @@map("reviews")
+}
+
+model Favorite {
+  id String @id @default(uuid())
+
+  userId String
+
+  destinationId String
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  destination Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, destinationId])
+  @@index([userId])
+  @@index([destinationId])
+  @@map("favorites")
 }

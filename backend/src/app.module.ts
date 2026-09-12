@@ -16,6 +16,7 @@ import { TripsModule } from "./modules/trips/trips.module";
 import { BookingsModule } from './modules/bookings/bookings.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
+import { FavoritesModule } from './modules/favorites/favorites.module';
 
 
 @Module({
@@ -36,6 +37,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
     BookingsModule,
     PaymentsModule,
     ReviewsModule,
+    FavoritesModule,
   ],
 
   controllers: [
