@@ -132,7 +132,30 @@ model Booking {
 
   destination Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
 
+  payments Payment[]
+
   @@index([userId])
   @@index([destinationId])
   @@map("bookings")
+}
+
+model Payment {
+  id String @id @default(uuid())
+
+  bookingId String
+
+  amount Float
+
+  status String @default("PENDING")
+
+  method String?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@map("payments")
 }
