@@ -13,6 +13,7 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { UsersModule } from "./modules/users/users.module";
 import { DestinationModule } from "./modules/destination/destination.module";
 import { TripsModule } from "./modules/trips/trips.module";
+import { BookingsModule } from './modules/bookings/bookings.module';
 
 
 @Module({
@@ -30,6 +31,7 @@ import { TripsModule } from "./modules/trips/trips.module";
     UsersModule,
     DestinationModule,
     TripsModule,
+    BookingsModule,
   ],
 
   controllers: [

@@ -7,31 +7,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ==========================
-// ENUM
-// ==========================
-
 enum UserStatus {
   ACTIVE
   SUSPENDED
   DELETED
 }
 
-// ==========================
-// USER
-// ==========================
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
 
 model User {
-  id           String @id @default(uuid())
+  id           String     @id @default(uuid())
   fullName     String
-  email        String @unique
+  email        String     @unique
   passwordHash String
-
-  phoneNumber String?
-  avatarUrl   String?
-  dateOfBirth DateTime?
-
-  status UserStatus @default(ACTIVE)
+  phoneNumber  String?
+  avatarUrl    String?
+  dateOfBirth  DateTime?
+  status       UserStatus @default(ACTIVE)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -39,26 +36,18 @@ model User {
   refreshTokens RefreshToken[]
   activityLogs  ActivityLog[]
   trips         Trip[]
+  bookings      Booking[]
 
   @@map("users")
 }
 
-// ==========================
-// REFRESH TOKEN
-// ==========================
-
 model RefreshToken {
-  id String @id @default(uuid())
-
-  userId String
-
-  tokenHash String @unique
-
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
   expiresAt DateTime
-
   revokedAt DateTime?
-
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -66,21 +55,12 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
-// ==========================
-// ACTIVITY LOG
-// ==========================
-
 model ActivityLog {
-  id String @id @default(uuid())
-
-  userId String
-
-  action String
-
+  id        String   @id @default(uuid())
+  userId    String
+  action    String
   ipAddress String?
-
   userAgent String?
-
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -89,37 +69,24 @@ model ActivityLog {
   @@map("activity_logs")
 }
 
-// ==========================
-// DESTINATION
-// ==========================
-
 model Destination {
-  id String @id @default(uuid())
-
-  name String
-
-  slug String @unique
-
+  id          String  @id @default(uuid())
+  name        String
+  slug        String  @unique
   description String?
-
-  country String
-
-  city String
-
-  imageUrl String?
-
-  category String?
-
-  rating Float?
+  country     String
+  city        String
+  imageUrl    String?
+  category    String?
+  rating      Float?
 
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
-}
 
-// ==========================
-// TRIP
-// ==========================
+  bookings Booking[]
+
+  @@map("destinations")
+}
 
 model Trip {
   id String @id @default(uuid())
@@ -141,4 +108,31 @@ model Trip {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@map("trips")
+}
+
+model Booking {
+  id String @id @default(uuid())
+
+  userId String
+
+  destinationId String
+
+  status BookingStatus @default(PENDING)
+
+  bookingDate DateTime @default(now())
+
+  note String?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  destination Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([destinationId])
+  @@map("bookings")
 }

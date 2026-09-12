@@ -1,32 +1,36 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { PassportStrategy } from "@nestjs/passport";
-import { ConfigService } from "@nestjs/config";
-import { ExtractJwt, Strategy } from "passport-jwt";
-import { JwtPayload } from "../types/jwt-payload.interface";
+import { Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { ConfigService } from '@nestjs/config';
+
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
-  constructor(configService: ConfigService) {
-    const secret = configService.get<string>("jwt.accessSecret");
-    if (!secret) {
-      throw new Error("JWT_ACCESS_SECRET is not configured");
-    }
+export class JwtStrategy extends PassportStrategy(Strategy) {
+
+  constructor(
+    private configService: ConfigService,
+  ) {
 
     super({
+
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+
       ignoreExpiration: false,
-      secretOrKey: secret,
+
+      secretOrKey: configService.get<string>('JWT_ACCESS_SECRET'),
+
     });
+
   }
 
-  /**
-   * Called automatically by Passport once the token signature/expiry
-   * check succeeds. The return value becomes `request.user`.
-   */
-  validate(payload: JwtPayload): JwtPayload {
-    if (!payload?.sub) {
-      throw new UnauthorizedException("Invalid access token");
-    }
-    return { sub: payload.sub, email: payload.email };
+
+  validate(payload: any) {
+
+    return {
+      id: payload.sub,
+      email: payload.email,
+    };
+
   }
+
 }
