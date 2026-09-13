@@ -1,4 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 
 
@@ -11,12 +15,43 @@ export class FavoritesService {
   ) {}
 
 
+  /**
+   * Loads a favorite and verifies that `userId` owns it. Throws
+   * NotFoundException if it doesn't exist, ForbiddenException if it
+   * belongs to someone else. Used by remove().
+   */
+  private async getOwnedFavorite(userId: string, id: string) {
 
-  async create(data:any){
+    const favorite = await this.prisma.favorite.findUnique({
+      where:{
+        id,
+      },
+    });
+
+    if (!favorite) {
+      throw new NotFoundException("Favorite not found");
+    }
+
+    if (favorite.userId !== userId) {
+      throw new ForbiddenException("You do not have access to this favorite");
+    }
+
+    return favorite;
+
+  }
+
+
+
+  async create(
+    userId: string,
+    data: {
+      destinationId: string;
+    },
+  ){
 
     return this.prisma.favorite.create({
       data:{
-        userId: data.userId,
+        userId,
         destinationId: data.destinationId,
       },
     });
@@ -25,9 +60,12 @@ export class FavoritesService {
 
 
 
-  async findAll(){
+  async findAll(userId: string){
 
     return this.prisma.favorite.findMany({
+      where: {
+        userId,
+      },
       include:{
         destination:true,
       },
@@ -37,38 +75,15 @@ export class FavoritesService {
 
 
 
-  async remove(id:string){
+  async remove(userId: string, id:string){
 
-    const favorite = await this.prisma.favorite.findUnique({
+    await this.getOwnedFavorite(userId, id);
+
+    return this.prisma.favorite.delete({
       where:{
         id,
       },
     });
-
-
-    if(!favorite){
-
-      return {
-        success:false,
-        message:"Favorite not found",
-      };
-
-    }
-
-
-
-    await this.prisma.favorite.delete({
-      where:{
-        id,
-      },
-    });
-
-
-
-    return {
-      success:true,
-      message:"Favorite deleted successfully",
-    };
 
   }
 

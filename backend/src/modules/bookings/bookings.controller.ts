@@ -5,15 +5,14 @@ import {
   Get,
   Param,
   Post,
-  Req,
   UseGuards,
 } from "@nestjs/common";
-
-import { Request } from "express";
 
 import { BookingsService } from "./bookings.service";
 
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { JwtPayload } from "../auth/types/jwt-payload.interface";
 
 
 @Controller("bookings")
@@ -29,16 +28,11 @@ export class BookingsController {
 
   @Post()
   create(
-    @Req() req: Request,
+    @CurrentUser() user: JwtPayload,
     @Body() body: any,
   ) {
 
-    const user = req.user as any;
-
-
-    return this.bookingsService.create({
-
-      userId: user.id,
+    return this.bookingsService.create(user.sub, {
 
       destinationId: body.destinationId,
 
@@ -52,9 +46,11 @@ export class BookingsController {
 
 
   @Get()
-  findAll(){
+  findAll(
+    @CurrentUser() user: JwtPayload,
+  ){
 
-    return this.bookingsService.findAll();
+    return this.bookingsService.findAll(user.sub);
 
   }
 
@@ -64,10 +60,11 @@ export class BookingsController {
 
   @Get(":id")
   findOne(
+    @CurrentUser() user: JwtPayload,
     @Param("id") id:string,
   ){
 
-    return this.bookingsService.findOne(id);
+    return this.bookingsService.findOne(user.sub, id);
 
   }
 
@@ -77,10 +74,11 @@ export class BookingsController {
 
   @Delete(":id")
   remove(
+    @CurrentUser() user: JwtPayload,
     @Param("id") id:string,
   ){
 
-    return this.bookingsService.remove(id);
+    return this.bookingsService.remove(user.sub, id);
 
   }
 

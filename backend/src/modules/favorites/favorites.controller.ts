@@ -5,12 +5,17 @@ import {
   Get,
   Param,
   Post,
+  UseGuards,
 } from "@nestjs/common";
 
 import { FavoritesService } from "./favorites.service";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { JwtPayload } from "../auth/types/jwt-payload.interface";
 
 
 @Controller("favorites")
+@UseGuards(JwtAuthGuard)
 export class FavoritesController {
 
 
@@ -22,19 +27,24 @@ export class FavoritesController {
 
   @Post()
   create(
+    @CurrentUser() user: JwtPayload,
     @Body() body:any,
   ){
 
-    return this.favoritesService.create(body);
+    return this.favoritesService.create(user.sub, {
+      destinationId: body.destinationId,
+    });
 
   }
 
 
 
   @Get()
-  findAll(){
+  findAll(
+    @CurrentUser() user: JwtPayload,
+  ){
 
-    return this.favoritesService.findAll();
+    return this.favoritesService.findAll(user.sub);
 
   }
 
@@ -42,10 +52,11 @@ export class FavoritesController {
 
   @Delete(":id")
   remove(
+    @CurrentUser() user: JwtPayload,
     @Param("id") id:string,
   ){
 
-    return this.favoritesService.remove(id);
+    return this.favoritesService.remove(user.sub, id);
 
   }
 
