@@ -13,6 +13,7 @@ import { PaymentsService } from "./payments.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { JwtPayload } from "../auth/types/jwt-payload.interface";
+import { CreatePaymentDto } from "./dto/create-payment.dto";
 
 @Controller("payments")
 @UseGuards(JwtAuthGuard)
@@ -20,8 +21,12 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post()
-  create(@CurrentUser() user: JwtPayload, @Body() body: any) {
-    return this.paymentsService.create(user.sub, body);
+  create(@CurrentUser() user: JwtPayload, @Body() dto: CreatePaymentDto) {
+    return this.paymentsService.create(user.sub, {
+      bookingId: dto.bookingId,
+      amount: dto.amount,
+      method: dto.method,
+    });
   }
 
   @Get()
