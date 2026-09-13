@@ -3,7 +3,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUUID,
   Max,
   MaxLength,
   Min,
@@ -12,7 +11,6 @@ import {
 export class CreateReviewDto {
   @IsString()
   @IsNotEmpty()
-  @IsUUID()
   destinationId!: string;
 
   @IsInt()
